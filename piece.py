@@ -48,18 +48,25 @@ class Piece(ABC, pg.sprite.Sprite):
         # Checking for an en passant move, a two-square advance by a pawn and a promotion
         if isinstance(self, Pawn): 
             if abs(int(key[1]) - int(self.square[1])) == 2:  
-                self.skipped = f"{key[0]}{int(key[1]) - 1}" if self.color == "White" else f"{key[0]}{int(key[1]) + 1}" 
+                self.board.en_passant = f"{key[0]}{int(key[1]) - 1}" if self.color == "White" else f"{key[0]}{int(key[1]) + 1}" 
             else:
-                self.skipped = None       
+                self.board.en_passant = "-"         
             
             if self.square[0] != key[0]:
                 for piece in self.board.pieces["black"].sprites() if self.color == "White" else self.board.pieces["white"].sprites():
                     if isinstance(piece, Pawn):
-                        if piece.skipped == key:
-                            removed_sprite = piece
-                            self.board.occ_squares.pop(piece.square)
-                            piece.kill()     
-                            break
+                        if piece.color == "White":
+                            if int(piece.square[1]) - int(key[1]) == 1:
+                                removed_sprite = piece
+                                self.board.occ_squares.pop(piece.square)
+                                piece.kill()     
+                                break
+                        else:
+                            if int(piece.square[1]) - int(key[1]) == -1:
+                                removed_sprite = piece
+                                self.board.occ_squares.pop(piece.square)
+                                piece.kill()     
+                                break     
             # Promotion
             if key[1] in ["1", "8"] and pseudo == False:
                 inst = Queen(key, self.board, self.color)
@@ -123,7 +130,6 @@ class Piece(ABC, pg.sprite.Sprite):
 class Pawn(Piece):
     def __init__(self, square: list, board: Any, color: str, icon="pawn", points=1) -> None:
         super().__init__(square, board, color, icon, points)
-        self.skipped = None # Square the pawn has skipped over in the two-square advance 
 
     def possible_moves(self):
         super().possible_moves()
@@ -167,35 +173,27 @@ class Pawn(Piece):
                     if self.board.occ_squares[f"{chr(ord(self.square[0]) - 1)}{int(self.square[1]) - 1}"].color != self.color: 
                         move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) - 1)}{int(self.square[1]) - 1}"])          
         # en passant
-        if f"{chr(ord(self.square[0]) + 1)}{self.square[1]}" in self.board.occ_squares:
-            if f"{chr(ord(self.square[0]) + 1)}{self.square[1]}" in self.board.square_dict:
-                if isinstance(self.board.occ_squares[f"{chr(ord(self.square[0]) + 1)}{self.square[1]}"], Pawn):
-                    pawn = self.board.occ_squares[f"{chr(ord(self.square[0]) + 1)}{self.square[1]}"]
-                    if pawn.skipped is not None and pawn.color != self.color:
-                        if self.color == "White":
-                            move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) + 1)}{int(self.square[1]) + 1}"])
-                        else: 
-                            move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) + 1)}{int(self.square[1]) - 1}"])  
+        if f"{chr(ord(self.square[0]) + 1)}{self.square[1]}" in self.board.square_dict:
+            if isinstance(self.board.occ_squares.get(f"{chr(ord(self.square[0]) + 1)}{self.square[1]}", ""), Pawn):
+                pawn = self.board.occ_squares[f"{chr(ord(self.square[0]) + 1)}{self.square[1]}"]
+                if pawn.color != self.color:
+                    if self.color == "White":
+                        move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) + 1)}{int(self.square[1]) + 1}"])
+                    else: 
+                        move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) + 1)}{int(self.square[1]) - 1}"])  
         
-        if f"{chr(ord(self.square[0]) - 1)}{self.square[1]}" in self.board.occ_squares:
-            if f"{chr(ord(self.square[0]) - 1)}{self.square[1]}" in self.board.square_dict:
-                if isinstance(self.board.occ_squares[f"{chr(ord(self.square[0]) - 1)}{self.square[1]}"], Pawn):
-                    pawn = self.board.occ_squares[f"{chr(ord(self.square[0]) - 1)}{self.square[1]}"]
-                    if pawn.skipped is not None and pawn.color != self.color:
-                        if self.color == "White":
-                            move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) - 1)}{int(self.square[1]) + 1}"])  
-                        else: 
-                            move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) - 1)}{int(self.square[1]) - 1}"]) 
+        if f"{chr(ord(self.square[0]) - 1)}{self.square[1]}" in self.board.square_dict:
+            if isinstance(self.board.occ_squares.get(f"{chr(ord(self.square[0]) - 1)}{self.square[1]}", ""), Pawn):
+                pawn = self.board.occ_squares[f"{chr(ord(self.square[0]) - 1)}{self.square[1]}"]
+                if pawn.color != self.color:
+                    if self.color == "White":
+                        move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) - 1)}{int(self.square[1]) + 1}"])  
+                    else: 
+                        move_list.append(self.board.square_dict[f"{chr(ord(self.square[0]) - 1)}{int(self.square[1]) - 1}"]) 
                         
         if self.color[0].lower() == self.board.to_move: 
             move_list = calc.detect_pseudo_moves(self, move_list)        
-        return move_list              
-    
-    def update(self) -> None:
-        super().update()  
-        # en passant is a one time opportunity
-        if self.board.to_move == self.color[0] and self.skipped is not None:
-            self.skipped = None               
+        return move_list                       
 
 class Rook(Piece):
     def __init__(self, square: list, board: Any, color: str, icon="rook", points=5) -> None:

@@ -186,8 +186,7 @@ def detect_pseudo_moves(instance, move_list : list):
     legal_moves = move_list.copy()
     
     current_pos = instance.board.square_dict[instance.square]
-    if instance.icon == "pawn":
-        skipped = instance.skipped  
+    en_passant = instance.board.en_passant
     
     for move in move_list:
         res_piece = instance.play(move, True)
@@ -207,8 +206,7 @@ def detect_pseudo_moves(instance, move_list : list):
             break      
         
         instance.play(current_pos, True)
-        if instance.icon == "pawn":
-            instance.skipped = skipped
+        instance.board.en_passant = en_passant
         
         if res_piece is not None:
             if instance.color == "White":

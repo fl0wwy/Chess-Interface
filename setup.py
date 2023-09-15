@@ -18,7 +18,7 @@ class Board():
         # managing pieces
         self.pieces = {"black" : pg.sprite.Group(), "white" : pg.sprite.Group()}
         self.w_king = self.b_king = None
-        self.enpassant = "-"
+        self.en_passant = "-"
         
 
         # board conditions
@@ -35,7 +35,7 @@ class Board():
 
         # player instances and init game state
         self.player_1 = self.player_2 = None
-        self.load_fen(fen, play_as, ai)
+        self.current_fen = self.load_fen(fen, play_as, ai)
 
     def row_col_display(self, display):
         """Displays the board coordinates
@@ -189,6 +189,9 @@ class Board():
             self.b_king.castling["king"] = "k"
         if fen.count("q") == 2:
             self.b_king.castling["queen"] = "q"
+
+        self.enpassant = fen[-5:-3].strip() 
+        self.half_moves = fen[-3:-1].strip()   
         
         return fen      
 
@@ -211,7 +214,10 @@ class Board():
         string.pop(-1)        
         
         castling_rights = [self.w_king.castling["king"], self.w_king.castling["queen"], self.b_king.castling["king"], self.b_king.castling["queen"]]
-        string.append(f' {self.to_move} {"".join(castling_rights)} {self.enpassant} {self.half_moves} {self.full_moves}')            
+        castling_rights = ''.join(castling_rights).strip("-")
+        if castling_rights == "":
+            castling_rights = "-"
+        string.append(f' {self.to_move} {castling_rights} {self.en_passant} {self.half_moves} {self.full_moves}')            
         
         return ''.join(string)  
               

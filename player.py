@@ -13,6 +13,7 @@ class AI:
         """Randomly generates a move
         """
         if self.board.to_move == self.color:
+            en_passant = self.board.en_passant
             sleep(0.1)
             depth = 0
             piece = choice(self.board.pieces["black"].sprites()) if self.color == "b" else choice(self.board.pieces["white"].sprites())
@@ -23,9 +24,12 @@ class AI:
                     return
             piece.play(choice(piece.possible_moves()))
             self.board.to_move = "w" if self.board.to_move == "b" else "b"
-            # updating move count
-            self.board.half_moves += 1
-            self.board.full_moves += 1 if self.color == "b" else 0
+            # updating move count, fen and en passant
+            self.board.half_moves = str(int(self.board.half_moves) + 1)
+            self.board.full_moves = str(int(self.board.full_moves) + 1) if self.color == "b" else self.board.full_moves
+            if self.board.en_passant == en_passant:
+                self.board.en_passant = "-"
+            self.board.current_fen = self.board.gen_fen()
 
 class Human:
     """Class that represents a human player
@@ -42,6 +46,7 @@ class Human:
             display (pg.display): the display obj which the moves are to be displayed on
         """
         if self.board.to_move == self.color:
+            en_passant = self.board.en_passant
             for piece in self.board.pieces["white"].sprites() if self.color == "w" else self.board.pieces["black"].sprites():
                 if piece == self:
                     continue
@@ -61,9 +66,12 @@ class Human:
                         self.pressed.moves.clear()
                         self.pressed = None
                         self.board.to_move = "b" if self.board.to_move == "w" else "w"
-                        # updating move count
-                        self.board.half_moves += 1
-                        self.board.full_moves += 1 if self.color == "b" else 0
+                        # updating move count, fen and en passant
+                        self.board.half_moves = str(int(self.board.half_moves) + 1)
+                        self.board.full_moves = str(int(self.board.full_moves) + 1) if self.color == "b" else self.board.full_moves
+                        if self.board.en_passant == en_passant:
+                            self.board.en_passant = "-"
+                        self.board.current_fen = self.board.gen_fen()
                         return
                 if pg.mouse.get_pressed()[2]:
                     self.pressed.rect.center = self.board.square_dict[self.pressed.square].center

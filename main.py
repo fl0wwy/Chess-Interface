@@ -36,7 +36,7 @@ class Game():
             #         self.game_active = True
 
     def display_fen(self):
-        text = self.font.render(self.board.gen_fen(), True, "white")
+        text = self.font.render(f"FEN: {self.board.current_fen}", True, "white")
         rect = text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() - 50))
         self.display.blit(text, rect)       
 
