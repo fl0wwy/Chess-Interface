@@ -9,12 +9,16 @@ Flip the board using the spacebar key.
 
 Play VS AI or a solo game.
 
+## IMPORTANT
+
+Please make sure to download the stockfish engine for the AI and position eval functions to work.
+
+https://stockfishchess.org/download/
+
+Simply extract the folder to the directory and it should work.
+
 ## Future ideas and plans:
 
 Implement better promotion method
 
 Integrate clock to the game
-
-Integrate StockFish API
-
-Make AI Stronger
