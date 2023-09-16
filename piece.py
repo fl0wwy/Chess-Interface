@@ -53,20 +53,13 @@ class Piece(ABC, pg.sprite.Sprite):
                 self.board.en_passant = "-"         
             
             if self.square[0] != key[0]:
-                for piece in self.board.pieces["black"].sprites() if self.color == "White" else self.board.pieces["white"].sprites():
-                    if isinstance(piece, Pawn):
-                        if piece.color == "White":
-                            if int(piece.square[1]) - int(key[1]) == 1:
-                                removed_sprite = piece
-                                self.board.occ_squares.pop(piece.square)
-                                piece.kill()     
-                                break
-                        else:
-                            if int(piece.square[1]) - int(key[1]) == -1:
-                                removed_sprite = piece
-                                self.board.occ_squares.pop(piece.square)
-                                piece.kill()     
-                                break     
+                if isinstance(self.board.occ_squares.get(f"{key[0]}{self.square[1]}", ""), Pawn):
+                    pawn = self.board.occ_squares.get(f"{key[0]}{self.square[1]}", "")
+                    if isinstance(self.board.occ_squares.get(f"{key[0]}{self.square[1]}", ""), Pawn):
+                        if isinstance(self.board.occ_squares.get(key, ""), str):
+                                removed_sprite = pawn
+                                self.board.occ_squares.pop(pawn.square)
+                                pawn.kill()   
             # Promotion
             if key[1] in ["1", "8"] and pseudo == False:
                 inst = Queen(key, self.board, self.color)
@@ -74,7 +67,7 @@ class Piece(ABC, pg.sprite.Sprite):
                     self.board.pieces["white"].add(inst)    
                 else:
                     self.board.pieces["black"].add(inst)   
-                
+                print("test")
                 self.kill()
                 self.board.occ_squares.pop(self.square)
                 self.board.occ_squares[key] = inst
@@ -130,6 +123,14 @@ class Piece(ABC, pg.sprite.Sprite):
 class Pawn(Piece):
     def __init__(self, square: list, board: Any, color: str, icon="pawn", points=1) -> None:
         super().__init__(square, board, color, icon, points)
+
+    def promote(self):
+        surface = pg.Surface((self.board.game_surface.get_width / 4, self.board.game_surface.get_height / 4))
+        rect = surface.get_rect(center=(self.board.game_surface.get_width / 2, self.board.game_surface.get_height / 2))
+        while True:
+            surface.fill("#161512")
+            self.board.game_surface.blit(surface, rect)
+            
 
     def possible_moves(self):
         super().possible_moves()

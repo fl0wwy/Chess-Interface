@@ -12,6 +12,9 @@ Play VS AI or a solo game.
 ## Future ideas and plans:
 
 Implement better promotion method
+
 Integrate clock to the game
+
 Integrate StockFish API
+
 Make AI Stronger
