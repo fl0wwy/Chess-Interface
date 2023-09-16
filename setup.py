@@ -25,7 +25,7 @@ class Board():
 
         # board conditions
         self.to_move = "w"
-        self.board_perspective = "w"
+        self.board_perspective = play_as
         self.half_moves = 0
         self.full_moves = 1
 

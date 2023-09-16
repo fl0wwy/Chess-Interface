@@ -1,5 +1,6 @@
 from setup import *
 import pyperclip
+import os
 
 class Game():
     def __init__(self, fen, play_as, ai, depth=10) -> None:
@@ -13,8 +14,10 @@ class Game():
         
         self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", 30)
         self.board = Board(fen, play_as, ai, depth)
+        self.ai = ai
 
-        self.ai = True
+        if play_as == "b":
+            self.board.flip_board()
 
     def update(self):
         pg.display.update()
@@ -80,8 +83,10 @@ class Game():
             #     rect = render.get_rect(center = (GAME_WINDOW_SIZE[0] / 2, GAME_WINDOW_SIZE[0] / 2)) 
             #     self.display.blit(render,rect)     
 
-            self.display_fen()
-            self.display_eval()
+            if os.path.exists("./stockfish") and os.path.isdir("./stockfish"):
+                self.display_eval()
+            
+            self.display_fen()    
             self.update()
 
 if __name__ == "__main__":

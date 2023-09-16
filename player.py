@@ -1,6 +1,4 @@
 import pygame as pg
-from random import choice
-from time import sleep
 
 class AI:
     """Class that represents an AI
@@ -80,7 +78,7 @@ class Human:
                         if self.board.en_passant == en_passant:
                             self.board.en_passant = "-"
                         self.board.current_fen = self.board.gen_fen()
-                        self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)
+                        self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
                         return
                 if pg.mouse.get_pressed()[2]:
                     self.pressed.rect.center = self.board.square_dict[self.pressed.square].center
