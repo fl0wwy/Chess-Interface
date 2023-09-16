@@ -62,12 +62,12 @@ class Piece(ABC, pg.sprite.Sprite):
                                 pawn.kill()   
             # Promotion
             if key[1] in ["1", "8"] and pseudo == False:
+                # self.promote()
                 inst = Queen(key, self.board, self.color)
                 if self.color == "White":
                     self.board.pieces["white"].add(inst)    
                 else:
                     self.board.pieces["black"].add(inst)   
-                print("test")
                 self.kill()
                 self.board.occ_squares.pop(self.square)
                 self.board.occ_squares[key] = inst
@@ -124,14 +124,13 @@ class Pawn(Piece):
     def __init__(self, square: list, board: Any, color: str, icon="pawn", points=1) -> None:
         super().__init__(square, board, color, icon, points)
 
-    def promote(self):
-        surface = pg.Surface((self.board.game_surface.get_width / 4, self.board.game_surface.get_height / 4))
-        rect = surface.get_rect(center=(self.board.game_surface.get_width / 2, self.board.game_surface.get_height / 2))
-        while True:
-            surface.fill("#161512")
-            self.board.game_surface.blit(surface, rect)
+    # def promote(self):
+    #     surface = pg.Surface((self.board.game_surface.get_width() / 4, self.board.game_surface.get_height() / 4))
+    #     rect = surface.get_rect(center=(self.board.game_surface.get_width() / 2, self.board.game_surface.get_height() / 2))
+    #     while True:
+    #         surface.fill("#161512")
+    #         self.board.game_surface.blit(surface, rect)
             
-
     def possible_moves(self):
         super().possible_moves()
         move_list = []

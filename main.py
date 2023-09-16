@@ -1,7 +1,8 @@
 from setup import *
+import pyperclip
 
 class Game():
-    def __init__(self) -> None:
+    def __init__(self, fen, play_as, ai, depth=10) -> None:
         pg.init()
         self.display = pg.display.set_mode((GAME_SURFACE_SIZE[0] * 1.7, GAME_SURFACE_SIZE[0] * 1.2))
         self.clock = pg.time.Clock()
@@ -11,9 +12,9 @@ class Game():
             pg.image.load("Pieces/White/knight.png").convert_alpha(), 0, 0.2))
         
         self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", 30)
-        self.board = Board(None, "w", False)
+        self.board = Board(fen, play_as, ai, depth)
 
-        self.ai = False
+        self.ai = True
 
     def update(self):
         pg.display.update()
@@ -26,7 +27,8 @@ class Game():
                 pg.quit()
                 exit()
             if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_SPACE]:
-                self.board.flip_board()    
+                self.board.flip_board()   
+   
             # if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_ESCAPE] and not self.start_menu:
             #     if self.esc_menu == False:
             #         self.esc_menu = True
@@ -36,9 +38,20 @@ class Game():
             #         self.game_active = True
 
     def display_fen(self):
-        text = self.font.render(f"FEN: {self.board.current_fen}", True, "white")
+        text = self.font.render(f"FEN(click to copy): {self.board.current_fen}", True, "white")
         rect = text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() - 50))
-        self.display.blit(text, rect)       
+        self.display.blit(text, rect)    
+        if rect.collidepoint(pg.mouse.get_pos()):
+            if pg.mouse.get_pressed()[0]:
+                pyperclip.copy(self.board.current_fen)   
+
+    def display_eval(self):
+            text = self.font.render(f"Stockfish eval: {self.board.position_analysis}", True, "white")
+            rect = text.get_rect(center = (self.display.get_width() -140, self.display.get_height() / 2))
+            self.display.blit(text, rect)    
+            if rect.collidepoint(pg.mouse.get_pos()):
+                if pg.mouse.get_pressed()[0]:
+                    pyperclip.copy(self.board.current_fen)             
 
     def __call__(self):
         while True:
@@ -68,10 +81,31 @@ class Game():
             #     self.display.blit(render,rect)     
 
             self.display_fen()
+            self.display_eval()
             self.update()
 
 if __name__ == "__main__":
-    # start_fen = input("Enter your customized fen string or to start a normal game enter [w/b]: ")
-    # ai = input("Play vs AI? [y/n]: ")
-    # ai = True if ai.lower() == "y" else False
-    Game()()
+    start_fen = input('Enter your customized fen string or to start a new game type "new": ')
+    if start_fen.lower() == "new":
+        start_fen = None
+    
+    play_as = input("Play as white or black? [w/b] (defaults to white): ")
+    if play_as.lower() not in ["W", "b"]:
+        play_as = "w"    
+    
+    ai = input("Play vs AI? [y/n]: ")
+    ai = True if ai.lower() == "y" else False
+    
+    difficulty = input("choose a difficulty to play against (easy, moderate, hard): ") if ai == True else 10
+    if difficulty != 10:
+        if difficulty.lower() not in ["easy", "moderate", "hard"]:
+            difficulty = 10
+        else:
+            if difficulty.lower() == "easy":
+                difficulty = 2
+            elif difficulty.lower() == "moderate":
+                difficulty = 5
+            else:
+                difficulty = 10           
+    
+    Game(start_fen, play_as, ai, difficulty)()

@@ -14,15 +14,22 @@ class AI:
         """
         if self.board.to_move == self.color:
             en_passant = self.board.en_passant
-            sleep(0.1)
-            depth = 0
-            piece = choice(self.board.pieces["black"].sprites()) if self.color == "b" else choice(self.board.pieces["white"].sprites())
-            while piece.possible_moves() == []:
-                depth += 1
-                piece = choice(self.board.pieces["black"].sprites()) if self.color == "b" else choice(self.board.pieces["white"].sprites())
-                if depth >= len(self.board.pieces["black"].sprites()) if self.color == "b" else len(self.board.pieces["white"].sprites()):
-                    return
-            piece.play(choice(piece.possible_moves()))
+            best_move = str(self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[0])
+            if "x" in best_move:
+                best_move = best_move.replace("x", "")
+            if len(best_move) == 5:
+                best_move = best_move[:4]
+            if best_move == "O-O":
+                best_move = "e1g1" if self.color == "w" else "e8g8"
+            elif best_move == "O-O-O":
+                best_move = "e1c1" if self.color == "w" else "e8c8"
+
+            try:
+                piece = self.board.occ_squares[best_move[:2]]
+                piece.play(self.board.square_dict[best_move[2::]])
+            except KeyError:
+                print(best_move)    
+
             self.board.to_move = "w" if self.board.to_move == "b" else "b"
             # updating move count, fen and en passant
             self.board.half_moves = str(int(self.board.half_moves) + 1)
@@ -30,6 +37,7 @@ class AI:
             if self.board.en_passant == en_passant:
                 self.board.en_passant = "-"
             self.board.current_fen = self.board.gen_fen()
+            self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
 
 class Human:
     """Class that represents a human player
@@ -72,6 +80,7 @@ class Human:
                         if self.board.en_passant == en_passant:
                             self.board.en_passant = "-"
                         self.board.current_fen = self.board.gen_fen()
+                        self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)
                         return
                 if pg.mouse.get_pressed()[2]:
                     self.pressed.rect.center = self.board.square_dict[self.pressed.square].center

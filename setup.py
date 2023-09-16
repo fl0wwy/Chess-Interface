@@ -1,3 +1,5 @@
+import chess
+import chess.engine
 from player import *
 import piece
 
@@ -5,7 +7,7 @@ tile_size = 100
 GAME_SURFACE_SIZE = (8 * tile_size, 8 * tile_size)
 
 class Board():
-    def __init__(self, fen, play_as, ai) -> None:
+    def __init__(self, fen, play_as, ai, depth) -> None:
         # display surface of the board
         self.game_surface = pg.Surface(GAME_SURFACE_SIZE)
         self.game_rect = self.game_surface.get_rect(center=((GAME_SURFACE_SIZE[0] / 2) * 1.7, (GAME_SURFACE_SIZE[0] / 2) * 1.2))
@@ -35,7 +37,9 @@ class Board():
 
         # player instances and init game state
         self.player_1 = self.player_2 = None
+        self.ai_depth = depth
         self.current_fen = self.load_fen(fen, play_as, ai)
+        self.position_analysis = self.analyze_position(self.current_fen, depth)[1]
 
     def row_col_display(self, display):
         """Displays the board coordinates
@@ -134,6 +138,27 @@ class Board():
                 y_axis += 1 
             self.board_perspective = "b"        
         return dic  
+    
+    def analyze_position(self, fen, depth):
+        try:
+            board = chess.Board(fen=fen)
+
+            with chess.engine.SimpleEngine.popen_uci(["stockfish/stockfish-windows-x86-64-modern.exe"]) as engine:
+                info = engine.analyse(board, chess.engine.Limit(depth=depth))
+
+                best_move = info.get("pv")[0]
+                evaluation = info.get("score").relative.score() / 100
+
+                return best_move, evaluation
+        except Exception as e:
+            return str(e)   
+
+    def is_valid_position(self, fen):
+        try:
+            chess.Board(fen=fen)    
+            return True
+        except ValueError:
+            return False 
 
     def load_fen(self, fen, play_as, ai):
         """Reads a fen string and places the pieces on the board accordingly
@@ -144,22 +169,27 @@ class Board():
         Raises:
             Exception: if the fen string if invalid an exception is raised
         """
-        # example fen "7k/3N2qp/b5r1/2p1Q1N1/Pp4PK/7P/1P3p2/6r1 WW"
         pieces = {"r" : piece.Rook, "n" : piece.Knight, "b" : piece.Bishop, "k" : piece.King, 
                   "q" : piece.Queen, "p" : piece.Pawn}
 
         if fen is None:
             fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
+        if self.is_valid_position(fen) == False:
+            print("FEN is not valid! please make sure the fen provided to load is correct.")
+            exit(1)    
+
         x = 97
         y = 8
 
-        self.to_move = fen[-12]
+        fen = fen.split(" ")
+
+        self.to_move = fen[1]
         self.player_1 = Human(play_as, self) 
         self.player_2 = AI("b" if play_as == "w" else "w", self) if ai else Human("b" if play_as == "w" else "w", self)
         self.square_dict = self.gen_dict()         
         
-        for i in fen[:-13]:
+        for i in fen[0]:
             if i.isdecimal():
                 x += int(i)
             elif i.isalpha():
@@ -181,19 +211,18 @@ class Board():
                 y -= 1
                 x = 97     
 
-        if fen.count("K") == 2:
-            self.w_king.castling["king"] = "K"
-        if fen.count("Q") == 2:
-            self.w_king.castling["queen"] = "Q"    
-        if fen.count("k") == 2:
-            self.b_king.castling["king"] = "k"
-        if fen.count("q") == 2:
-            self.b_king.castling["queen"] = "q"
-
-        self.enpassant = fen[-5:-3].strip() 
-        self.half_moves = fen[-3:-1].strip()   
         
-        return fen      
+        self.w_king.castling["king"] = "K" if "K" in fen[2] else "-"
+        self.w_king.castling["queen"] = "Q" if "Q" in fen[2] else "-"   
+        
+        self.b_king.castling["king"] = "k" if "k" in fen[2] else "-"
+        self.b_king.castling["queen"] = "q" if "q" in fen[2] else "-"
+
+        self.enpassant = fen[3]
+        self.half_moves = fen[4]  
+        self.full_moves = fen[5]
+        
+        return " ".join(fen)      
 
     def gen_fen(self):
         """Generates a fen string from the current board conditions"""
