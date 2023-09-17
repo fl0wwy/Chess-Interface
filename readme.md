@@ -23,3 +23,5 @@ If you rather not, everything else will work as expected just make sure to pick 
 Implement better promotion method
 
 Integrate clock to the game
+
+implement checkmate

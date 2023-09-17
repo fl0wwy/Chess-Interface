@@ -29,9 +29,14 @@ class Game():
             if event.type == pg.QUIT:
                 pg.quit()
                 exit()
-            if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_SPACE]:
-                self.board.flip_board()   
-   
+            if event.type == pg.KEYDOWN: 
+                if pg.key.get_pressed()[pg.K_SPACE]:
+                    self.board.flip_board()  
+                elif pg.key.get_pressed()[pg.K_DOWN]:
+                    self.traverse_positions(-1)  
+                elif pg.key.get_pressed()[pg.K_UP]:  
+                    self.traverse_positions(1)         
+     
             # if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_ESCAPE] and not self.start_menu:
             #     if self.esc_menu == False:
             #         self.esc_menu = True
@@ -39,7 +44,19 @@ class Game():
             #     else:
             #         self.esc_menu = False
             #         self.game_active = True
-
+    
+    def traverse_positions(self, increment):
+        if self.board.game_position_index + increment > -1:
+            return False
+        if self.board.game_position_index + increment < len(self.board.game_positions) * -1:
+            return False 
+        self.board.game_position_index += increment  
+        
+        self.board.reset_board()
+        self.board.load_fen(self.board.game_positions[self.board.game_position_index], self.board.player_1.color, self.ai)
+        self.board.current_fen = self.board.gen_fen()
+        self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
+    
     def display_fen(self):
         text = self.font.render(f"FEN(click to copy): {self.board.current_fen}", True, "white")
         rect = text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() - 50))

@@ -34,11 +34,13 @@ class Board():
         self.occ_squares = {}
 
         self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", 20)
+        self.game_position_index = -1
 
         # player instances and init game state
         self.player_1 = self.player_2 = None
         self.ai_depth = depth
         self.current_fen = self.load_fen(fen, play_as, ai)
+        self.game_positions = [self.current_fen]
         self.position_analysis = self.analyze_position(self.current_fen, depth)[1]
 
     def row_col_display(self, display):
@@ -160,6 +162,12 @@ class Board():
         except ValueError:
             return False 
 
+    def reset_board(self):
+        self.square_dict = {}
+        self.occ_squares = {}
+        self.pieces["white"].empty()
+        self.pieces["black"].empty()
+    
     def load_fen(self, fen, play_as, ai):
         """Reads a fen string and places the pieces on the board accordingly
 

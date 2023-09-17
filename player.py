@@ -1,11 +1,21 @@
 import pygame as pg
+from abc import ABC, abstractmethod
 
-class AI:
+class Player(ABC):
+    def __init__(self, color, board) -> None:
+        super().__init__()
+        self.color = color
+        self.board = board
+
+    @abstractmethod
+    def move(self):
+        pass
+
+class AI(Player):
     """Class that represents an AI
     """
     def __init__(self, color, board) -> None:
-        self.color = color
-        self.board = board
+        super().__init__(color, board)
 
     def move(self):
         """Randomly generates a move
@@ -34,16 +44,23 @@ class AI:
             self.board.full_moves = str(int(self.board.full_moves) + 1) if self.color == "b" else self.board.full_moves
             if self.board.en_passant == en_passant:
                 self.board.en_passant = "-"
+            
             self.board.current_fen = self.board.gen_fen()
+            
+            if self.board.game_position_index == -1:
+                self.board.game_positions.append(self.board.current_fen)
+            else:
+                self.board.game_positions = self.board.game_positions[:self.board.game_position_index]
+                self.board.game_positions.append(self.board.current_fen)    
+            
             self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
 
-class Human:
+class Human(Player):
     """Class that represents a human player
     """
     def __init__(self, color, board) -> None:
-        self.color = color
-        self.board = board
-        self.pressed = None # piece that is pressed by the player
+        super().__init__(color, board)
+        self.pressed = None
 
     def move(self, display):   
         """Generates, possible moves for a selected piece, displays possible moves on screen and executes a move once chosen.
@@ -78,6 +95,13 @@ class Human:
                         if self.board.en_passant == en_passant:
                             self.board.en_passant = "-"
                         self.board.current_fen = self.board.gen_fen()
+                        
+                        if self.board.game_position_index == -1:
+                            self.board.game_positions.append(self.board.current_fen)
+                        else:
+                            self.board.game_positions = self.board.game_positions[:self.board.game_position_index]
+                            self.board.game_positions.append(self.board.current_fen)  
+                        
                         self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
                         return
                 if pg.mouse.get_pressed()[2]:
