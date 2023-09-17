@@ -4,7 +4,16 @@ from player import *
 import piece
 
 class Board():
-    def __init__(self, fen, play_as, ai, depth, tile_size=100) -> None:
+    def __init__(self, fen : str, play_as : str, ai, depth, tile_size=100) -> None:
+        """Holds the information about the game
+
+        Args:
+            fen (str): FEN string to generate the game position
+            play_as (str): "w" or "b" determines which side the human/main player plays on
+            ai (bool): True if players wants to play vs AI else False
+            depth (int): AI Move calculation depth. Defaults to 10.
+            tile_size (int, optional): the size of each side of the board's squares. Defaults to 100.
+        """
         # display surface of the board
         self.tile_size = tile_size
         self.GAME_SURFACE_SIZE = 8 * tile_size
@@ -13,7 +22,7 @@ class Board():
         self.game_rect = self.game_surface.get_rect(center=((self.GAME_SURFACE_SIZE / 2) * 1.7, (self.GAME_SURFACE_SIZE / 2) * 1.2))
         
         
-        # board itself
+        # computer's internal representation of the board
         self.GRID = [[pg.Rect(self.game_rect.left + (x * self.tile_size) ,self.game_rect.top + (y * self.tile_size)
                               , self.tile_size, self.tile_size) for x in range(8)] for y in range(8)]
         
@@ -33,16 +42,15 @@ class Board():
         # organizing board
         self.square_dict = {}
         self.occ_squares = {}
-
         self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(20 * (self.tile_size/100)))
-        self.game_position_index = -1
 
-        # player instances and init game state
+        # player instances and init game
         self.player_1 = self.player_2 = None
         self.ai_depth = depth
         self.current_fen = self.load_fen(fen, play_as, ai)
         self.game_positions = [self.current_fen]
         self.position_analysis = self.analyze_position(self.current_fen, depth)[1]
+        self.game_position_index = -1
 
     def row_col_display(self, display):
         """Displays the board coordinates
@@ -103,6 +111,8 @@ class Board():
         self.row_col_display(display) 
 
     def flip_board(self):
+        """Flips the game board
+        """
         if self.board_perspective == "w":
             self.square_dict = self.gen_dict(white_side=False)
             self.board_perspective = "b"
@@ -115,6 +125,9 @@ class Board():
     
     def gen_dict(self, white_side=True):
         """Creates a dictionary with the board cord as a key and the pg.rect obj as the value
+
+        Args:
+            white_side(bool, optional): if the main player is playing white pieces
 
         Returns:
             dictionary
@@ -142,7 +155,16 @@ class Board():
             self.board_perspective = "b"        
         return dic  
     
-    def analyze_position(self, fen, depth):
+    def analyze_position(self, fen: str, depth: int):
+        """Stockfish's analysis of the current game position
+
+        Args:
+            fen (str): FEN string representing the current game position
+            depth (int): The depth which Stockfish calculates positions to
+
+        Returns:
+            tuple: best move, evaluation
+        """
         try:
             board = chess.Board(fen=fen)
 
@@ -156,7 +178,15 @@ class Board():
         except Exception as e:
             return str(e)   
 
-    def game_over(self, fen):
+    def game_over(self, fen : str):
+        """Checks if the game is over
+
+        Args:
+            fen (str): FEN string representing current position
+
+        Returns:
+            bool or None: 1 if game result is checkmate, 0 if stalemate, None if game hasn't concluded
+        """
         try:
             board = chess.Board(fen=fen)
             if board.is_checkmate():
@@ -168,7 +198,15 @@ class Board():
         except Exception:
             return None
     
-    def is_valid_position(self, fen):
+    def is_valid_position(self, fen : str):
+        """Checks wether the FEN string is valid
+
+        Args:
+            fen (str): _description_
+
+        Returns:
+            _type_: _description_
+        """
         try:
             chess.Board(fen=fen)    
             return True
@@ -181,14 +219,16 @@ class Board():
         self.pieces["white"].empty()
         self.pieces["black"].empty()
     
-    def load_fen(self, fen, play_as, ai):
+    def load_fen(self, fen : str, play_as : str, ai : bool):
         """Reads a fen string and places the pieces on the board accordingly
 
         Args:
             fen (str): a string format that the function interperates as locations on the board and what piece are to be placed.
+            play_as (str): which side the main player plays as
+            ai (bool): If the player chooses to play vs AI
 
         Raises:
-            Exception: if the fen string if invalid an exception is raised
+            Exception: if the fen string if invalid
         """
         pieces = {"r" : piece.Rook, "n" : piece.Knight, "b" : piece.Bishop, "k" : piece.King, 
                   "q" : piece.Queen, "p" : piece.Pawn}

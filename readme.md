@@ -25,3 +25,7 @@ CTRL +/- to resize window.
 ARROW_DOWN/ARROW_UP to traverse game positions.
 
 SPACEBAR to flip the board.
+
+## To-do
+
+fix pawn move bug

@@ -4,13 +4,18 @@ from typing import Any
 import pygame as pg
 
 class Piece(ABC, pg.sprite.Sprite):
-    def __init__(self, square : str , board : Any, color : str, icon : str, points : int) -> None:
+    """Abstract class that represents each piece on the board
+
+    Args:
+        ABC (class): Abstract Base Classes module
+        pg.sprite.Sprite (class): Base class for visible game objects
+    """
+    def __init__(self, square : str , board : Any, color : str, icon : str) -> None:
         super().__init__()
         self.square = square
         self.color = color
         self.board = board # setup.Board() obj
         self.icon = icon
-        self.points = points
         self.code = self.icon[0].upper() if self.color == "White" else self.icon[0]
         
         self.image = pg.transform.rotozoom(
@@ -31,6 +36,7 @@ class Piece(ABC, pg.sprite.Sprite):
 
         Args:
             square (pg.rect obj]): the square the piece is to be moved to
+            psuedo (bool, optional): If the move being played is to test psuedo legal moves (calc.detect_psuedo_moves) == True
 
         Returns:
             pg.Sprite: returns the captured piece (if one has been captured)
@@ -100,6 +106,7 @@ class Piece(ABC, pg.sprite.Sprite):
                     self.board.b_king.castling["queen"] = "-"                            
                                
         
+        # Playing move and updating board
         self.board.occ_squares.pop(self.square)
         self.square = key  
         self.board.occ_squares[key] = self
@@ -118,19 +125,13 @@ class Piece(ABC, pg.sprite.Sprite):
             else:
                 if self.board.square_dict[self.board.w_king.square] in self.possible_moves():
                     self.board.w_king.checked = True  
+        
         return removed_sprite  
 
 class Pawn(Piece):
-    def __init__(self, square: list, board: Any, color: str, icon="pawn", points=1) -> None:
-        super().__init__(square, board, color, icon, points)
-
-    # def promote(self):
-    #     surface = pg.Surface((self.board.game_surface.get_width() / 4, self.board.game_surface.get_height() / 4))
-    #     rect = surface.get_rect(center=(self.board.game_surface.get_width() / 2, self.board.game_surface.get_height() / 2))
-    #     while True:
-    #         surface.fill("#161512")
-    #         self.board.game_surface.blit(surface, rect)
-            
+    def __init__(self, square: list, board: Any, color: str, icon="pawn") -> None:
+        super().__init__(square, board, color, icon)
+    
     def possible_moves(self):
         super().possible_moves()
         move_list = []
@@ -196,8 +197,8 @@ class Pawn(Piece):
         return move_list                       
 
 class Rook(Piece):
-    def __init__(self, square: list, board: Any, color: str, icon="rook", points=5) -> None:
-        super().__init__(square, board, color, icon, points)
+    def __init__(self, square: list, board: Any, color: str, icon="rook") -> None:
+        super().__init__(square, board, color, icon)
         self.moved = False # Checks if the rook has been moved as castling condition
     
     def possible_moves(self):
@@ -209,8 +210,8 @@ class Rook(Piece):
         return moves
         
 class Knight(Piece):
-    def __init__(self, square: list, board: Any, color: str, icon="knight", points=3) -> None:
-        super().__init__(square, board, color, icon, points)     
+    def __init__(self, square: list, board: Any, color: str, icon="knight") -> None:
+        super().__init__(square, board, color, icon)     
         self.code = 'N' if self.color == 'White' else 'n'
 
     def possible_moves(self):
@@ -277,8 +278,8 @@ class Knight(Piece):
         return moves               
 
 class Bishop(Piece):
-    def __init__(self, square: list, board: Any, color: str, icon="bishop", points=3) -> None:
-        super().__init__(square, board, color, icon, points)
+    def __init__(self, square: list, board: Any, color: str, icon="bishop") -> None:
+        super().__init__(square, board, color, icon)
 
     def possible_moves(self):
         super().possible_moves()
@@ -288,8 +289,8 @@ class Bishop(Piece):
         return moves  
 
 class King(Piece):
-    def __init__(self, square: list, board: Any, color: str, icon="king", points=float("inf")) -> None:
-        super().__init__(square, board, color, icon, points)
+    def __init__(self, square: list, board: Any, color: str, icon="king") -> None:
+        super().__init__(square, board, color, icon)
         self.checked = False
         self.castling = {}
         self.moved = False # Checks if the king has moved for castling condition
@@ -382,8 +383,8 @@ class King(Piece):
         return moves                  
 
 class Queen(Piece):
-    def __init__(self, square: list, board: Any, color: str, icon="queen", points=9) -> None:
-        super().__init__(square, board, color, icon, points)
+    def __init__(self, square: list, board: Any, color: str, icon="queen") -> None:
+        super().__init__(square, board, color, icon)
 
     def possible_moves(self):  
         super().possible_moves()

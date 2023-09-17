@@ -18,9 +18,10 @@ class AI(Player):
         super().__init__(color, board)
 
     def move(self):
-        """Randomly generates a move
+        """Translates Stockfish's best move calculation to fit the move generation functions input
         """
         if self.board.to_move == self.color:
+            # calculation and translation
             en_passant = self.board.en_passant
             best_move = str(self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[0])
             if "x" in best_move:
@@ -38,8 +39,8 @@ class AI(Player):
             except KeyError:
                 print(best_move)    
 
+            # switching side, updating move count, fen and en passant
             self.board.to_move = "w" if self.board.to_move == "b" else "b"
-            # updating move count, fen and en passant
             self.board.half_moves = str(int(self.board.half_moves) + 1)
             self.board.full_moves = str(int(self.board.full_moves) + 1) if self.color == "b" else self.board.full_moves
             if self.board.en_passant == en_passant:
@@ -47,12 +48,15 @@ class AI(Player):
             
             self.board.current_fen = self.board.gen_fen()
             
+            # adding position to the positions list
             if self.board.game_position_index == -1:
                 self.board.game_positions.append(self.board.current_fen)
             else:
                 self.board.game_positions = self.board.game_positions[:self.board.game_position_index]
-                self.board.game_positions.append(self.board.current_fen)    
+                self.board.game_positions.append(self.board.current_fen)  
+                self.board.game_position_index = -1  
             
+            # analyzing board and checking if game over
             self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
             if self.board.game_over(self.board.current_fen) != None:
                 self.board.running = False
@@ -72,12 +76,8 @@ class Human(Player):
         """
         if self.board.to_move == self.color:
             en_passant = self.board.en_passant
-            for piece in self.board.pieces["white"].sprites() if self.color == "w" else self.board.pieces["black"].sprites():
-                if piece == self:
-                    continue
-                if piece.pressed:
-                    return
             
+            # if a piece is highlighted
             if self.pressed is not None:
                 if self.pressed.moves == []:
                     self.pressed.moves = self.pressed.possible_moves() or []
@@ -86,8 +86,8 @@ class Human(Player):
                 for rect in self.pressed.moves:
                     pg.draw.ellipse(display, "#3E2723", rect.scale_by(0.4, 0.4))
                     if rect.collidepoint(pg.mouse.get_pos()) and pg.mouse.get_pressed()[0]:
-                        self.pressed.play(rect)
                         # Switch playing side, clear current move list and move the piece to its new square
+                        self.pressed.play(rect)
                         self.pressed.moves.clear()
                         self.pressed = None
                         self.board.to_move = "b" if self.board.to_move == "w" else "w"
@@ -98,16 +98,21 @@ class Human(Player):
                             self.board.en_passant = "-"
                         self.board.current_fen = self.board.gen_fen()
                         
+                        # adding position to the positions list
                         if self.board.game_position_index == -1:
                             self.board.game_positions.append(self.board.current_fen)
                         else:
                             self.board.game_positions = self.board.game_positions[:self.board.game_position_index]
                             self.board.game_positions.append(self.board.current_fen)  
+                            self.board.game_position_index = -1  
                         
+                        # analyzing board and checking if game over
                         self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
                         if self.board.game_over(self.board.current_fen) != None:
                             self.board.running = False
                         return
+                
+                # unhighlights piece
                 if pg.mouse.get_pressed()[2]:
                     self.pressed.rect.center = self.board.square_dict[self.pressed.square].center
                     self.pressed.moves.clear()   

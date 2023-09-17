@@ -3,7 +3,17 @@ import pyperclip
 import os
 
 class Game():
-    def __init__(self, fen, play_as, ai, depth=10) -> None:
+    """Game class which houses all window functions and game loop
+    """
+    def __init__(self, fen : str, play_as : str, ai: bool, depth=10) -> None:
+        """Initialization of the game
+
+        Args:
+            fen (str): FEN string to generate the game position
+            play_as (str): "w" or "b" determines which side the human/main player plays on
+            ai (bool): True if players wants to play vs AI else False
+            depth (int, optional): AI Move calculation depth. Defaults to 10.
+        """
         pg.init()
         self.display = pg.display.set_mode((800 * 1.7, 800 * 1.2))
         self.clock = pg.time.Clock()
@@ -13,7 +23,7 @@ class Game():
             pg.image.load("Pieces/White/knight.png").convert_alpha(), 0, 0.2))
         
         self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(30 * (100/100)))
-        self.board = Board(fen, play_as, ai, depth)
+        self.board = Board(fen, play_as, ai, depth) # initializing the game
         self.ai = ai
 
         if play_as == "b":
@@ -29,27 +39,32 @@ class Game():
             if event.type == pg.QUIT:
                 pg.quit()
                 exit()
+            
             if event.type == pg.KEYDOWN: 
                 if pg.key.get_pressed()[pg.K_SPACE]:
                     self.board.flip_board()  
+                
                 elif pg.key.get_pressed()[pg.K_DOWN] & self.board.running:
                     self.traverse_positions(-1)  
+                
                 elif pg.key.get_pressed()[pg.K_UP] & self.board.running:  
                     self.traverse_positions(1)   
+                
                 elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_MINUS] & self.board.running:  
                     self.resize_window(-10)      
+                
                 elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_EQUALS] & self.board.running: 
                     self.resize_window(10)         
-     
-            # if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_ESCAPE] and not self.start_menu:
-            #     if self.esc_menu == False:
-            #         self.esc_menu = True
-            #         self.game_active = False    
-            #     else:
-            #         self.esc_menu = False
-            #         self.game_active = True
     
-    def resize_window(self, increment):
+    def resize_window(self, increment : int):
+        """Resizing the window by an increment each time a certain keydown event occurs
+
+        Args:
+            increment (int): determines by how much the size of each board square should increase/decrease
+
+        Returns:
+            False if the window size > 0
+        """
         if self.board.tile_size + increment <= 0:
             return False
         
@@ -61,7 +76,15 @@ class Game():
         self.display = pg.display.set_mode((self.board.GAME_SURFACE_SIZE * 1.7, self.board.GAME_SURFACE_SIZE * 1.2))
         self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(30 * (self.board.tile_size/100)))
     
-    def traverse_positions(self, increment):
+    def traverse_positions(self, increment : int):
+        """Traverse throughout all positions played in game so far.
+
+        Args:
+            increment (int): by how many moves should the function jump back and forth from
+
+        Returns:
+           False if the move index doesn't exist
+        """
         if self.board.game_position_index + increment > -1:
             return False
         if self.board.game_position_index + increment < len(self.board.game_positions) * -1:
@@ -74,6 +97,8 @@ class Game():
         self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
     
     def display_fen(self):
+        """Displays the FEN string of the current position
+        """
         text = self.font.render(f"FEN(click to copy): {self.board.current_fen}", True, "white")
         rect = text.get_rect(center = (self.display.get_width() / 2, (self.display.get_height() -(50 * (self.board.tile_size/100)))))
         self.display.blit(text, rect)    
@@ -82,14 +107,17 @@ class Game():
                 pyperclip.copy(self.board.current_fen)   
 
     def display_eval(self):
-            text = self.font.render(f"Stockfish eval: {self.board.position_analysis}", True, "white")
-            rect = text.get_rect(center = ((self.display.get_width() -(140 * (self.board.tile_size/100))), self.display.get_height() / 2))
-            self.display.blit(text, rect)    
-            if rect.collidepoint(pg.mouse.get_pos()):
-                if pg.mouse.get_pressed()[0]:
-                    pyperclip.copy(self.board.current_fen)             
+        """Displays Stockfish's evaluation of the current position"""
+        text = self.font.render(f"Stockfish eval: {self.board.position_analysis}", True, "white")
+        rect = text.get_rect(center = ((self.display.get_width() -(140 * (self.board.tile_size/100))), self.display.get_height() / 2))
+        self.display.blit(text, rect)    
+        if rect.collidepoint(pg.mouse.get_pos()):
+            if pg.mouse.get_pressed()[0]:
+                pyperclip.copy(self.board.current_fen)             
 
     def game_over_message(self):
+        """Display the game_over state once the game has concluded (checkmate or stalemate)
+        """
         if self.board.game_over(self.board.current_fen) == 1:
             if self.board.to_move == "w":
                 text = self.font.render(f"Checkmate. White wins.", True, "White")
@@ -102,6 +130,8 @@ class Game():
         self.display.blit(text, rect)            
     
     def __call__(self):
+        """Game loop
+        """
         while True:
             self.display.fill("#161512")
             self.check_events()
@@ -129,6 +159,8 @@ class Game():
             self.update()
 
 if __name__ == "__main__":
+    """Inputs about the game settings and calling the game loop function
+    """
     start_fen = input('Enter your customized fen string or to start a new game type "new": ')
     if start_fen.lower() == "new":
         start_fen = None
