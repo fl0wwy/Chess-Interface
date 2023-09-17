@@ -11,17 +11,17 @@ Play VS AI or a solo game.
 
 ## IMPORTANT
 
-Please make sure to download the stockfish engine for the AI and position evaluation functions to work.
+The interface only works partially without the Stockfish engine. You can download it here:
 
 https://stockfishchess.org/download/
 
 Simply extract the folder to the directory and it should work.
 If you rather not, everything else will work as expected just make sure to pick "n" when prompted for the AI option.
 
-## Future ideas and plans:
+## Controls
 
-Implement better promotion method
+CTRL +/- to resize window.
 
-Integrate clock to the game
+ARROW_DOWN/ARROW_UP to traverse game positions.
 
-implement checkmate
+SPACEBAR to flip the board.

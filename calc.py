@@ -23,10 +23,10 @@ def horizontal_calc(instance):
                     else:
                         if rect.centerx < instance.board.square_dict[instance.square].centerx:
                             if rect.centerx > neg_thersh:
-                                neg_thersh = rect.centerx - 100
+                                neg_thersh = rect.centerx - 100 * instance.board.tile_size/100
                         else:
                             if rect.centerx < pos_thersh:
-                                pos_thersh = rect.centerx + 100
+                                pos_thersh = rect.centerx + 100 * instance.board.tile_size/100
                 poss.append(rect)
     
     copy = poss.copy()                 
@@ -60,10 +60,10 @@ def vertical_calc(instance):
                     else:
                         if rect.centery < instance.board.square_dict[instance.square].centery:
                             if rect.centery > neg_thersh:
-                                neg_thersh = rect.centery - 100
+                                neg_thersh = rect.centery - 100 * instance.board.tile_size/100
                         else:
                             if rect.centery < pos_thersh:
-                                pos_thersh = rect.centery + 100
+                                pos_thersh = rect.centery + 100 * instance.board.tile_size/100
                 poss.append(rect)
     
     copy = poss.copy()                 
@@ -85,11 +85,11 @@ def diagonal_calc(instance):
         pos_x = neg_x = instance.board.square_dict[instance.square].centerx
         pos_thresh = [float('-inf'), float('-inf')]
         neg_thresh = [float('inf'), float('inf')]
-        while ceil_y >= 50 or floor_y <= 750:
-            ceil_y -= 100
-            floor_y += 100
-            neg_x -= 100
-            pos_x += 100
+        while ceil_y >= 50 * instance.board.tile_size/100 or floor_y <= 750 * instance.board.tile_size/100:
+            ceil_y -= 100 * instance.board.tile_size/100
+            floor_y += 100 * instance.board.tile_size/100
+            neg_x -= 100 * instance.board.tile_size/100
+            pos_x += 100 * instance.board.tile_size/100
             for row in instance.board.GRID:
                 for rect in row:
                     if rect.center == (neg_x, ceil_y):
@@ -101,7 +101,7 @@ def diagonal_calc(instance):
                                     pos_thresh = list(rect.center)
                             else:   
                                 if pos_thresh[0] < rect.centerx:
-                                    pos_thresh = [rect.centerx - 100, rect.centery - 100]
+                                    pos_thresh = [rect.centerx - 100 * instance.board.tile_size/100, rect.centery - 100 * instance.board.tile_size/100]
                         candidates.append(rect)               
                     elif rect.center == (pos_x, floor_y):   
                         pos = list(instance.board.square_dict.values()).index(rect)
@@ -112,7 +112,7 @@ def diagonal_calc(instance):
                                     neg_thresh = list(rect.center)
                             else:   
                                 if neg_thresh[0] > rect.centerx:
-                                    neg_thresh = [rect.centerx + 100, rect.centery + 100]
+                                    neg_thresh = [rect.centerx + 100 * instance.board.tile_size/100, rect.centery + 100 * instance.board.tile_size/100]
                         candidates.append(rect)
         copy = candidates.copy()
         for rect in candidates:
@@ -129,11 +129,11 @@ def diagonal_calc(instance):
         pos_x = neg_x = instance.board.square_dict[instance.square].centerx
         pos_thresh = [float('inf'), float('-inf')]
         neg_thresh = [float('-inf'), float('inf')]
-        while ceil_y >= 50 or floor_y <= 750:
-            ceil_y -= 100
-            floor_y += 100
-            neg_x -= 100
-            pos_x += 100
+        while ceil_y >= 50 * instance.board.tile_size/100 or floor_y <= 750 * instance.board.tile_size/100: 
+            ceil_y -= 100 * instance.board.tile_size/100
+            floor_y += 100 * instance.board.tile_size/100
+            neg_x -= 100 * instance.board.tile_size/100
+            pos_x += 100 * instance.board.tile_size/100
             for row in instance.board.GRID:
                 for rect in row:
                     if rect.center == (pos_x, ceil_y):
@@ -145,7 +145,7 @@ def diagonal_calc(instance):
                                     pos_thresh = list(rect.center)
                             else:   
                                 if pos_thresh[0] > rect.centerx:
-                                    pos_thresh = [rect.centerx + 100, rect.centery - 100]
+                                    pos_thresh = [rect.centerx + 100 * instance.board.tile_size/100, rect.centery - 100 * instance.board.tile_size/100]
                         candidates.append(rect)
                     elif rect.center == (neg_x, floor_y):
                         pos = list(instance.board.square_dict.values()).index(rect)
@@ -156,7 +156,7 @@ def diagonal_calc(instance):
                                     neg_thresh = list(rect.center)
                             else:   
                                 if neg_thresh[0] < rect.centerx:
-                                    neg_thresh = [rect.centerx - 100, rect.centery + 100]
+                                    neg_thresh = [rect.centerx - 100 * instance.board.tile_size/100, rect.centery + 100 * instance.board.tile_size/100]
                         candidates.append(rect)
         copy = candidates.copy()
         for rect in candidates:

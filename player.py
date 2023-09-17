@@ -54,6 +54,8 @@ class AI(Player):
                 self.board.game_positions.append(self.board.current_fen)    
             
             self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
+            if self.board.game_over(self.board.current_fen) != None:
+                self.board.running = False
 
 class Human(Player):
     """Class that represents a human player
@@ -103,6 +105,8 @@ class Human(Player):
                             self.board.game_positions.append(self.board.current_fen)  
                         
                         self.board.position_analysis = self.board.analyze_position(self.board.current_fen, self.board.ai_depth)[1]
+                        if self.board.game_over(self.board.current_fen) != None:
+                            self.board.running = False
                         return
                 if pg.mouse.get_pressed()[2]:
                     self.pressed.rect.center = self.board.square_dict[self.pressed.square].center

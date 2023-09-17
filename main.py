@@ -32,13 +32,13 @@ class Game():
             if event.type == pg.KEYDOWN: 
                 if pg.key.get_pressed()[pg.K_SPACE]:
                     self.board.flip_board()  
-                elif pg.key.get_pressed()[pg.K_DOWN]:
+                elif pg.key.get_pressed()[pg.K_DOWN] & self.board.running:
                     self.traverse_positions(-1)  
-                elif pg.key.get_pressed()[pg.K_UP]:  
+                elif pg.key.get_pressed()[pg.K_UP] & self.board.running:  
                     self.traverse_positions(1)   
-                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_MINUS]:  
+                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_MINUS] & self.board.running:  
                     self.resize_window(-10)      
-                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_EQUALS]: 
+                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_EQUALS] & self.board.running: 
                     self.resize_window(10)         
      
             # if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_ESCAPE] and not self.start_menu:
@@ -89,6 +89,18 @@ class Game():
                 if pg.mouse.get_pressed()[0]:
                     pyperclip.copy(self.board.current_fen)             
 
+    def game_over_message(self):
+        if self.board.game_over(self.board.current_fen) == 1:
+            if self.board.to_move == "w":
+                text = self.font.render(f"Checkmate. White wins.", True, "White")
+            else:
+                text = self.font.render(f"Checkmate. White wins.", True, "White")    
+        else:
+            text = self.font.render(f"Stalemate.", True, "White")   
+
+        rect = text.get_rect(center=(self.display.get_width() / 2, self.display.get_height() - ((self.display.get_height() - 40 * (self.board.tile_size/100)))))    
+        self.display.blit(text, rect)            
+    
     def __call__(self):
         while True:
             self.display.fill("#161512")
@@ -102,20 +114,14 @@ class Game():
                 self.board.pieces["black"].draw(self.display)
                 self.board.pieces["white"].draw(self.display)  
             self.board.pieces["black"].update()
-            self.board.pieces["white"].update()      
-            self.board.player_1.move(self.display)
-            self.board.player_2.move() if self.ai else self.board.player_2.move(self.display)
+            self.board.pieces["white"].update()    
             
-            # if self.board.check_winner() is not None:
-            #     if self.board.check_winner() == -1:
-            #         render = self.font.render("Checkmate, Black is victorious.", True, "#f5f6fa")
-            #     elif self.board.check_winner() == 1:    
-            #         render = self.font.render("Checkmate, White is victorious.", True, "#f5f6fa")
-            #     else:
-            #         render = self.font.render("Draw.", True, "white")  
-            #     rect = render.get_rect(center = (GAME_WINDOW_SIZE[0] / 2, GAME_WINDOW_SIZE[0] / 2)) 
-            #     self.display.blit(render,rect)     
-
+            if self.board.running:  
+                self.board.player_1.move(self.display)
+                self.board.player_2.move() if self.ai else self.board.player_2.move(self.display)
+            else:
+                self.game_over_message()
+            
             if os.path.exists("./stockfish") and os.path.isdir("./stockfish"):
                 self.display_eval()
             

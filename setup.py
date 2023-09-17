@@ -28,6 +28,7 @@ class Board():
         self.board_perspective = play_as
         self.half_moves = 0
         self.full_moves = 1
+        self.running = True
 
         # organizing board
         self.square_dict = {}
@@ -155,6 +156,18 @@ class Board():
         except Exception as e:
             return str(e)   
 
+    def game_over(self, fen):
+        try:
+            board = chess.Board(fen=fen)
+            if board.is_checkmate():
+                return 1
+            elif board.is_stalemate():
+                return 0
+            else:
+                return None
+        except Exception:
+            return None
+    
     def is_valid_position(self, fen):
         try:
             chess.Board(fen=fen)    
@@ -230,6 +243,8 @@ class Board():
         self.half_moves = fen[4]  
         self.full_moves = fen[5]
         
+        if self.game_over(" ".join(fen)) != None:
+            self.running = False
         return " ".join(fen)      
 
     def gen_fen(self):
