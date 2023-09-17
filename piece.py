@@ -14,7 +14,7 @@ class Piece(ABC, pg.sprite.Sprite):
         self.code = self.icon[0].upper() if self.color == "White" else self.icon[0]
         
         self.image = pg.transform.rotozoom(
-            pg.image.load(f"Pieces/{self.color}/{icon}.png").convert_alpha(), 0, 0.6)
+            pg.image.load(f"Pieces/{self.color}/{icon}.png").convert_alpha(), 0, 0.6 * (self.board.tile_size/100))
         self.rect = self.image.get_rect(center = self.board.square_dict[self.square].center)
 
         self.moves = []

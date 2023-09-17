@@ -5,14 +5,14 @@ import os
 class Game():
     def __init__(self, fen, play_as, ai, depth=10) -> None:
         pg.init()
-        self.display = pg.display.set_mode((GAME_SURFACE_SIZE[0] * 1.7, GAME_SURFACE_SIZE[0] * 1.2))
+        self.display = pg.display.set_mode((800 * 1.7, 800 * 1.2))
         self.clock = pg.time.Clock()
 
         pg.display.set_caption("Chess")
         pg.display.set_icon(pg.transform.rotozoom(
             pg.image.load("Pieces/White/knight.png").convert_alpha(), 0, 0.2))
         
-        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", 30)
+        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(30 * (100/100)))
         self.board = Board(fen, play_as, ai, depth)
         self.ai = ai
 
@@ -35,7 +35,11 @@ class Game():
                 elif pg.key.get_pressed()[pg.K_DOWN]:
                     self.traverse_positions(-1)  
                 elif pg.key.get_pressed()[pg.K_UP]:  
-                    self.traverse_positions(1)         
+                    self.traverse_positions(1)   
+                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_MINUS]:  
+                    self.resize_window(-10)      
+                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_EQUALS]: 
+                    self.resize_window(10)         
      
             # if event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_ESCAPE] and not self.start_menu:
             #     if self.esc_menu == False:
@@ -44,6 +48,18 @@ class Game():
             #     else:
             #         self.esc_menu = False
             #         self.game_active = True
+    
+    def resize_window(self, increment):
+        if self.board.tile_size + increment <= 0:
+            return False
+        
+        temp = self.board
+        
+        self.board = Board(self.board.current_fen, play_as=temp.player_1.color, ai=ai, depth=temp.ai_depth, tile_size=temp.tile_size+increment)
+        self.board.game_positions = temp.game_positions
+        self.board.game_position_index = temp.game_position_index
+        self.display = pg.display.set_mode((self.board.GAME_SURFACE_SIZE * 1.7, self.board.GAME_SURFACE_SIZE * 1.2))
+        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(30 * (self.board.tile_size/100)))
     
     def traverse_positions(self, increment):
         if self.board.game_position_index + increment > -1:
@@ -59,7 +75,7 @@ class Game():
     
     def display_fen(self):
         text = self.font.render(f"FEN(click to copy): {self.board.current_fen}", True, "white")
-        rect = text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() - 50))
+        rect = text.get_rect(center = (self.display.get_width() / 2, (self.display.get_height() -(50 * (self.board.tile_size/100)))))
         self.display.blit(text, rect)    
         if rect.collidepoint(pg.mouse.get_pos()):
             if pg.mouse.get_pressed()[0]:
@@ -67,7 +83,7 @@ class Game():
 
     def display_eval(self):
             text = self.font.render(f"Stockfish eval: {self.board.position_analysis}", True, "white")
-            rect = text.get_rect(center = (self.display.get_width() -140, self.display.get_height() / 2))
+            rect = text.get_rect(center = ((self.display.get_width() -(140 * (self.board.tile_size/100))), self.display.get_height() / 2))
             self.display.blit(text, rect)    
             if rect.collidepoint(pg.mouse.get_pos()):
                 if pg.mouse.get_pressed()[0]:
@@ -130,4 +146,5 @@ if __name__ == "__main__":
             else:
                 difficulty = 10           
     
+    print("press SPACEBAR to flip the board, ARROW KEYS to traverse moves, CTRL +/- to resize.")
     Game(start_fen, play_as, ai, difficulty)()

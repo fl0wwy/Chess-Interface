@@ -3,19 +3,19 @@ import chess.engine
 from player import *
 import piece
 
-tile_size = 100
-GAME_SURFACE_SIZE = (8 * tile_size, 8 * tile_size)
-
 class Board():
-    def __init__(self, fen, play_as, ai, depth) -> None:
+    def __init__(self, fen, play_as, ai, depth, tile_size=100) -> None:
         # display surface of the board
-        self.game_surface = pg.Surface(GAME_SURFACE_SIZE)
-        self.game_rect = self.game_surface.get_rect(center=((GAME_SURFACE_SIZE[0] / 2) * 1.7, (GAME_SURFACE_SIZE[0] / 2) * 1.2))
+        self.tile_size = tile_size
+        self.GAME_SURFACE_SIZE = 8 * tile_size
+        
+        self.game_surface = pg.Surface((self.GAME_SURFACE_SIZE, self.GAME_SURFACE_SIZE))
+        self.game_rect = self.game_surface.get_rect(center=((self.GAME_SURFACE_SIZE / 2) * 1.7, (self.GAME_SURFACE_SIZE / 2) * 1.2))
         
         
         # board itself
-        self.GRID = [[pg.Rect(self.game_rect.left + (x * tile_size) ,self.game_rect.top + (y * tile_size)
-                              , tile_size, tile_size) for x in range(8)] for y in range(8)]
+        self.GRID = [[pg.Rect(self.game_rect.left + (x * self.tile_size) ,self.game_rect.top + (y * self.tile_size)
+                              , self.tile_size, self.tile_size) for x in range(8)] for y in range(8)]
         
         # managing pieces
         self.pieces = {"black" : pg.sprite.Group(), "white" : pg.sprite.Group()}
@@ -33,7 +33,7 @@ class Board():
         self.square_dict = {}
         self.occ_squares = {}
 
-        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", 20)
+        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(20 * (self.tile_size/100)))
         self.game_position_index = -1
 
         # player instances and init game state
@@ -54,28 +54,28 @@ class Board():
             for x in reversed(range(8)):
                 # row
                 rect_x = self.GRID[7][(x -7) * -1].scale_by(0.4, 0.4)
-                rect_x.left -= 28
-                rect_x.bottom += 47
+                rect_x.left -= 28 * (self.tile_size/100)
+                rect_x.bottom += 47 * (self.tile_size/100)
                 display.blit(self.font.render(chr(char_x), True, "#f5f6fa"), rect_x)
                 char_x += 1
                 # col
                 rect_y = self.GRID[(x -7) * -1][7].scale_by(0.4, 0.4)
-                rect_y.left += 56
-                rect_y.bottom -= 28
+                rect_y.left += 56 * (self.tile_size/100)
+                rect_y.bottom -= 28 * (self.tile_size/100)
                 display.blit(self.font.render(str(x + 1), True, "#f5f6fa"), rect_y)
         else:
             char_x = 104
             for x in range(8):
                 # row
                 rect_x = self.GRID[7][x].scale_by(0.4, 0.4)
-                rect_x.left -= 28
-                rect_x.bottom += 47
+                rect_x.left -= 28 * (self.tile_size/100)
+                rect_x.bottom += 47 * (self.tile_size/100)
                 display.blit(self.font.render(chr(char_x), True, "#f5f6fa"), rect_x)
                 char_x -= 1
                 # col
                 rect_y = self.GRID[x][7].scale_by(0.4, 0.4)
-                rect_y.left += 56
-                rect_y.bottom -= 28
+                rect_y.left += 56 * (self.tile_size/100)
+                rect_y.bottom -= 28 * (self.tile_size/100)
                 display.blit(self.font.render(str(x + 1), True, "#f5f6fa"), rect_y)    
 
     def display_board(self, display):
