@@ -22,7 +22,7 @@ class Game():
         pg.display.set_icon(pg.transform.rotozoom(
             pg.image.load("Pieces/White/knight.png").convert_alpha(), 0, 0.2))
         
-        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", int(30 * (100/100)))
+        self.font = pg.font.Font("pieces/Philosopher-Regular.ttf", 30)
         self.board = Board(fen, play_as, ai, depth) # initializing the game
         self.ai = ai
 
@@ -44,16 +44,16 @@ class Game():
                 if pg.key.get_pressed()[pg.K_SPACE]:
                     self.board.flip_board()  
                 
-                elif pg.key.get_pressed()[pg.K_DOWN] & self.board.running:
+                if pg.key.get_pressed()[pg.K_DOWN] & self.board.running:
                     self.traverse_positions(-1)  
                 
-                elif pg.key.get_pressed()[pg.K_UP] & self.board.running:  
+                if pg.key.get_pressed()[pg.K_UP] & self.board.running:  
                     self.traverse_positions(1)   
                 
-                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_MINUS] & self.board.running:  
+                if pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_MINUS] & self.board.running:  
                     self.resize_window(-10)      
                 
-                elif pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_EQUALS] & self.board.running: 
+                if pg.key.get_pressed()[pg.K_LCTRL] & pg.key.get_pressed()[pg.K_EQUALS] & self.board.running: 
                     self.resize_window(10)         
     
     def resize_window(self, increment : int):
@@ -70,7 +70,7 @@ class Game():
         
         temp = self.board
         
-        self.board = Board(self.board.current_fen, play_as=temp.player_1.color, ai=ai, depth=temp.ai_depth, tile_size=temp.tile_size+increment)
+        self.board = Board(self.board.current_fen, play_as=temp.player_1.color, ai=ai, depth=temp.ai_depth, tile_size=temp.tile_size + increment)
         self.board.game_positions = temp.game_positions
         self.board.game_position_index = temp.game_position_index
         self.display = pg.display.set_mode((self.board.GAME_SURFACE_SIZE * 1.7, self.board.GAME_SURFACE_SIZE * 1.2))
@@ -155,7 +155,7 @@ class Game():
             if os.path.exists("./stockfish") and os.path.isdir("./stockfish"):
                 self.display_eval()
             
-            self.display_fen()    
+            self.display_fen()  
             self.update()
 
 if __name__ == "__main__":
@@ -184,5 +184,7 @@ if __name__ == "__main__":
             else:
                 difficulty = 10           
     
-    print("press SPACEBAR to flip the board, ARROW KEYS to traverse moves, CTRL +/- to resize.")
-    Game(start_fen, play_as, ai, difficulty)()
+    print("press SPACEBAR to flip the board, ARROWS UP/DOWN to traverse moves, CTRL +/- to zoom.")
+    
+    game = Game(start_fen, play_as, ai, difficulty)
+    game()

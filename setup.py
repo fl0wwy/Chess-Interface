@@ -47,6 +47,7 @@ class Board():
         # player instances and init game
         self.player_1 = self.player_2 = None
         self.ai_depth = depth
+        self.ai = ai
         self.current_fen = self.load_fen(fen, play_as, ai)
         self.game_positions = [self.current_fen]
         self.position_analysis = self.analyze_position(self.current_fen, depth)[1]
@@ -211,6 +212,7 @@ class Board():
             chess.Board(fen=fen)    
             return True
         except ValueError:
+            print(fen)
             return False 
 
     def reset_board(self):

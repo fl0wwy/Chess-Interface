@@ -28,4 +28,5 @@ SPACEBAR to flip the board.
 
 ## To-do
 
-fix pawn move bug
+Add clock
+self made AI

@@ -31,7 +31,7 @@ class Piece(ABC, pg.sprite.Sprite):
         """
         pass                                           
 
-    def play(self, square, pseudo=False):
+    def play(self, square, pseudo=False, reverse=False):
         """Plays the move chosen by the player and updates the board information
 
         Args:
@@ -58,7 +58,7 @@ class Piece(ABC, pg.sprite.Sprite):
             else:
                 self.board.en_passant = "-"         
             
-            if self.square[0] != key[0]:
+            if self.square[0] != key[0] and reverse == False:
                 if isinstance(self.board.occ_squares.get(f"{key[0]}{self.square[1]}", ""), Pawn):
                     pawn = self.board.occ_squares.get(f"{key[0]}{self.square[1]}", "")
                     if isinstance(self.board.occ_squares.get(f"{key[0]}{self.square[1]}", ""), Pawn):

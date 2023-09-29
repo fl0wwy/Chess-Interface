@@ -1,4 +1,4 @@
-# A python file which contains functions for calculation of possible moves
+# contains functions for calculating horizontal, diagonal and vertical moves, as well as detecting pseudo legal moves.
 
 def horizontal_calc(instance):
     """Funcion which calculates horizontal line possible moves (for Rook and Queen)"""
@@ -205,7 +205,7 @@ def detect_pseudo_moves(instance, move_list : list):
                 continue
             break      
         
-        instance.play(current_pos, True)
+        instance.play(current_pos, True, True)
         instance.board.en_passant = en_passant
         
         if res_piece is not None:
