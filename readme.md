@@ -29,4 +29,7 @@ SPACEBAR to flip the board.
 ## To-do
 
 Add clock
+
 self made AI
+
+File detection for stockfish/auto install
